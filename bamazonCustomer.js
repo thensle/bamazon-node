@@ -65,7 +65,7 @@ function customerPrompt1(productInfo){
 };
 
 function quantity(product){
-	var state = "selected";
+	var product = product;
 	inquirer.prompt([
 		{
 			name: "quantity",
@@ -83,7 +83,13 @@ function quantity(product){
 		}
 	]).then(function(data){
 		var quantity = data;
-		
+
+		//Need to update database with new inventory stock values
+			//Need to store all purchasing data in an object (maybe within an array?)
+		var cart = {}
+
+		connection.query("UPDATE projects ")
+
 	};
 
 function checkout(){};
