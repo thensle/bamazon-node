@@ -1,6 +1,9 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
-var query = "Select * from products";
+var argu = "Select * from products";
+var product = "";
+var purchases = [];
+var total = 0;
 
 var connection = mysql.createConnection({
 	host: "localhost",
@@ -24,7 +27,7 @@ connection.connect(function(err){
 function itemsDisplay(){
 	var productId = [];
 
-	connection.query(query, function(error, response){
+	connection.query(argu, function(error, response){
 		if (error){
 			console.log(error);
 		} else {
@@ -65,31 +68,78 @@ function customerPrompt1(productInfo){
 };
 
 function quantity(product){
-	var product = product;
+	product = product;
 	inquirer.prompt([
 		{
 			name: "quantity",
-			type: "input",
-			message: "How many of " + product + " would you like to purchase?",
-			validate: function(input){
-				if(typeof input != "number" && input % 0 === false){
-					console.log("\n\n That's not a valid quantity number! Try again.");
-					
-					setTimeout(function(){
-						quantity(product);
-					}, 3000);
-				};
-			};
+			type: "list",
+			message: "How many would you like to purchase?",
+			choices: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
 		}
 	]).then(function(data){
-		var quantity = data;
+		var quantity = parseInt(data.quantity);
+		stockSearch(quantity);
+	});
+};
 
-		//Need to update database with new inventory stock values
-			//Need to store all purchasing data in an object (maybe within an array?)
-		var cart = {}
+function stockSearch(quantity){
+	connection.query(argu, function(error, response){
+		if (error){
+			console.log(error);
+		} else {
+			for(var i = 0; i < response.length; i++){
+				if(product === response[i].product_name + " - " + response[i].item_id){
+					var stock = response[i].stock_quantity;
+					var remaining;
 
-		connection.query("UPDATE projects ")
+					if(quantity < stock){
+						var order = {
+							item: product,
+							number: quantity
+						};
+						console.log("\n\nThere's currently enough of the product to fulfill your order. Thank you!");
+						purchases.push(order);
+						remaining = stock - quantity;
+						updateDb(product, remaining);
+						console.log(purchases);
+						itemsDisplay();
+					} else {
+						console.log("\n\nSorry, there's currently not enough of this product to fulfill your order!");
+						itemsDisplay();
+					};
+				};
+			};
+		};
+	});
+};
 
-	};
+function updateDb(product, remaining){
+	connection.query("UPDATE products SET stock_quantity = ? where product_name = ?", [parseInt(remaining), product], function(error, response){
+		if (error){
+			console.log(error);
+		} else {
+			console.log("Store stock is updated!");
+		};
+	});
+};
 
-function checkout(){};
+function checkout(){
+	var total = 0;
+	connection.query(argu, function(error, response){
+		if (error){
+			console.log(error);
+		} else {
+			for(var i = 0; i < purchases.length; i++){
+				var cartName = purchases[i].item;
+				for(var i = 0; i < response.length; i++){
+					var db = response[i].product_name + " - " + response[i].item_id;
+					if (db = cartName){
+						total = total + (response[i].price * purchases[i].number);
+					};
+				};
+			};
+
+			console.log("Thanks for your purchase! Your total is: " + total);
+		};
+	});
+};
