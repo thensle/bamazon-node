@@ -87,11 +87,7 @@ function stockSearch(quantity){
 		if (error){
 			console.log(error);
 		} else {
-			console.log('successfuly query')
-			console.log('response is: ' + response)
-			console.log('product is: ' + product)
 			for(var i = 0; i < response.length; i++){
-				console.log(response[i])
 				if(product === response[i].product_name + " - " + response[i].item_id){
 					var stock = response[i].stock_quantity;
 					var remaining;
