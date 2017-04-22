@@ -67,8 +67,8 @@ function customerPrompt1(productInfo){
 	});
 };
 
-function quantity(product){
-	product = product;
+function quantity(p){
+	product = p;
 	inquirer.prompt([
 		{
 			name: "quantity",
@@ -87,7 +87,11 @@ function stockSearch(quantity){
 		if (error){
 			console.log(error);
 		} else {
+			console.log('successfuly query')
+			console.log('response is: ' + response)
+			console.log('product is: ' + product)
 			for(var i = 0; i < response.length; i++){
+				console.log(response[i])
 				if(product === response[i].product_name + " - " + response[i].item_id){
 					var stock = response[i].stock_quantity;
 					var remaining;
@@ -102,10 +106,10 @@ function stockSearch(quantity){
 						remaining = stock - quantity;
 						updateDb(product, remaining);
 						console.log(purchases);
-						itemsDisplay();
+						setTimeout(function(){itemsDisplay();}, 3000);
 					} else {
 						console.log("\n\nSorry, there's currently not enough of this product to fulfill your order!");
-						itemsDisplay();
+						setTimeout(function(){itemsDisplay();}, 3000);
 					};
 				};
 			};
